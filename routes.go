@@ -131,7 +131,7 @@ func getRatingParams(r *http.Request) (float64, float64, error) {
 }
 
 func getLimitParam(r *http.Request) (int, error) {
-	limit := 0
+	limit := 100
 	queryParams := r.URL.Query()
 	l := queryParams.Get("limit")
 	if l != "" {
