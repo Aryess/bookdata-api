@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/moficodes/bookdata/api/loader"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/moficodes/bookdata/api/loader"
 )
 
 func searchByISBN(w http.ResponseWriter, r *http.Request) {
@@ -80,6 +81,29 @@ func searchByBookName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNotFound)
+}
+
+func listBooks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	ratingOver, ratingBelow, err := getRatingParams(r)
+	limit, err := getLimitParam(r)
+	skip, err := getSkipParam(r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"error": "invalid datatype for parameter"}`))
+		return
+	}
+
+	data := *books.SearchBook("", ratingOver, ratingBelow, limit, skip)
+	b, err := json.Marshal(data)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"error": "error marshalling data"}`))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+	return
 }
 
 func getRatingParams(r *http.Request) (float64, float64, error) {
